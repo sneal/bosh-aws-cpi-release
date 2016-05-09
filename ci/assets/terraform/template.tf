@@ -81,7 +81,7 @@ resource "aws_network_acl" "allow_all" {
 }
 
 resource "aws_security_group" "allow_all" {
-  name = "allow_all"
+  name = "allow_all-${var.env_name}"
   description = "Allow all inbound and outgoing traffic"
 
   ingress {
