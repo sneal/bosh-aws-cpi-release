@@ -1,4 +1,5 @@
 ---
+# TODO: vars (?) to pass into the template(s)
 groups:
   - name: bosh-aws-cpi-release
     jobs:
@@ -15,12 +16,40 @@ groups:
 
   - name: all
     jobs:
+      - add-new-env
+      - destroy-env
       - recreate-infrastructure-primary
       - build-candidate
       - lifecycle
       - promote-candidate
 
 jobs:
+  - name: add-new-env
+    plan:
+      - get: bosh-cpi-src, resource: bosh-cpi-src-in
+      - put: terraform
+        params:
+          source: bosh-cpi-src/ci/assets/terraform
+          generate_random_name: true
+      - put: locks
+        params:
+          add: terraform
+
+  - name: destroy-env
+    plan:
+      - get: bosh-cpi-src, resource: bosh-cpi-src-in
+      - put: locks
+        params:
+          acquire: true
+      - put: terraform
+        params:
+          source: bosh-cpi-src/ci/assets/terraform
+          env_name_file: locks/name
+          action: destroy
+      - put: locks
+        params:
+          remove: locks
+
   - name: recreate-infrastructure-primary
     serial_groups: [lifecycle]
     plan:
@@ -73,7 +102,7 @@ jobs:
           aws_access_key_id:            {{aws_access_key__primary}}
           aws_secret_access_key:        {{aws_secret_key__primary}}
           region_name:                  {{aws_region__primary}}
-          stack_name:                   primary
+          stack_name:                   develop-lifecycle
 
   - name: promote-candidate
     plan:
@@ -93,6 +122,12 @@ jobs:
 
       - put: release-version-semver
         params: {file: release-version-semver/number}
+
+resource_types:
+  - name: terraform
+    type: docker-image
+    source:
+      repository: ljfranklin/terraform-resource
 
 resources:
   - name: bosh-cpi-dev-artifacts
@@ -135,3 +170,24 @@ resources:
       bucket:            {{s3_aws_cpi_pipeline_bucket}}
       access_key_id:     {{aws_access_key__primary}}
       secret_access_key: {{aws_secret_key__primary}}
+
+  - name: locks
+    type: pool
+    source:
+      uri: git@github.com:cloudfoundry/bosh-cpi-environments.git
+      pool: aws
+      private_key: {{github_deployment_key__bosh-cpi-environments}}
+
+  - name: terraform
+    type: terraform
+    source:
+      storage:
+        access_key_id:     {{aws_access_key__primary}}
+        secret_access_key: {{aws_secret_key__primary}}
+        bucket:            {{terraform_bucket}}
+        bucket_path:       terraform-state
+      terraform:
+        vars:
+          access_key: {{aws_access_key__primary}}
+          secret_key: {{aws_secret_key__primary}}
+          region:     {{aws_region__primary}}
