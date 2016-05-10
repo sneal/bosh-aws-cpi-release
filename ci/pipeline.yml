@@ -1,30 +1,15 @@
 ---
-# TODO: vars (?) to pass into the template(s)
 groups:
-  - name: bosh-aws-cpi-release
+  - name: bosh-aws-cpi
     jobs:
-      - build-candidate
-      - lifecycle
-      - promote-candidate
-
-  - name: primary
-    jobs:
-      - recreate-infrastructure-primary
-      - build-candidate
-      - lifecycle
-      - promote-candidate
-
-  - name: all
-    jobs:
-      - add-new-env
-      - destroy-env
-      - recreate-infrastructure-primary
+      - create-environment
+      - destroy-environment
       - build-candidate
       - lifecycle
       - promote-candidate
 
 jobs:
-  - name: add-new-env
+  - name: create-environment
     plan:
       - get: bosh-cpi-src
         resource: bosh-cpi-src-in
@@ -37,7 +22,7 @@ jobs:
         params:
           add: terraform
 
-  - name: destroy-env
+  - name: destroy-environment
     plan:
       - get: bosh-cpi-src
         resource: bosh-cpi-src-in
@@ -93,8 +78,9 @@ jobs:
         file: bosh-cpi-src/ci/tasks/build-candidate.yml
 
       - put: bosh-cpi-dev-artifacts
-        params: {from: candidate/.*\.tgz}
+        params: {file: candidate/.*\.tgz}
 
+  # TODO: check for running instances and destroy
   - name: lifecycle
     serial_groups: [lifecycle]
     plan:
@@ -112,12 +98,13 @@ jobs:
           AWS_ACCESS_KEY_ID:     {{aws_access_key__primary}}
           AWS_SECRET_ACCESS_KEY: {{aws_secret_key__primary}}
           AWS_DEFAULT_REGION:    {{aws_region__primary}}
+          AWS_PUBLIC_KEY_NAME:   {{cpi_pipeline_public_key_name}}
 
-      ensure:
-        do:
-          - put: environment
-            params:
-              release: environment
+        ensure:
+          do:
+            - put: environment
+              params:
+                release: environment
 
   - name: promote-candidate
     plan:

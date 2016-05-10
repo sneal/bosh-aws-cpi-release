@@ -5,6 +5,7 @@ set -e
 : ${AWS_ACCESS_KEY_ID:?}
 : ${AWS_SECRET_ACCESS_KEY:?}
 : ${AWS_DEFAULT_REGION:?}
+: ${AWS_PUBLIC_KEY_NAME:?}
 
 release_dir="$( cd $(dirname $0) && cd ../.. && pwd )"
 
@@ -16,7 +17,7 @@ metadata=$(cat environment/metadata)
 
 export BOSH_AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 export BOSH_AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-export BOSH_AWS_DEFAULT_KEY_NAME='bats'
+export BOSH_AWS_DEFAULT_KEY_NAME=${AWS_PUBLIC_KEY_NAME}
 export BOSH_AWS_SUBNET_ID=$(echo ${metadata} | jq --raw-output ".PublicSubnetID")
 export BOSH_AWS_SUBNET_ZONE=$(echo ${metadata} | jq --raw-output ".AvailabilityZone")
 export BOSH_AWS_LIFECYCLE_MANUAL_IP=$(echo ${metadata} | jq --raw-output ".DirectorStaticIP")
