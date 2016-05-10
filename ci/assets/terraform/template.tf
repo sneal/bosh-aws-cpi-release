@@ -81,6 +81,7 @@ resource "aws_network_acl" "allow_all" {
 }
 
 resource "aws_security_group" "allow_all" {
+  vpc_id = "${aws_vpc.default.id}"
   name = "allow_all-${var.env_name}"
   description = "Allow all inbound and outgoing traffic"
 
