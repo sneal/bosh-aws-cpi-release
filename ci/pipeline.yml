@@ -13,11 +13,13 @@ jobs:
     plan:
       - get: bosh-cpi-src
         resource: bosh-cpi-src-in
+
       - put: terraform
         params:
           terraform:
             source: bosh-cpi-src/ci/assets/terraform
           generate_random_name: true
+
       - put: environment
         params:
           add: terraform
@@ -26,9 +28,18 @@ jobs:
     plan:
       - get: bosh-cpi-src
         resource: bosh-cpi-src-in
+
       - put: environment
         params:
           acquire: true
+
+      - task: ensure-terminated
+        file: bosh-cpi-src/ci/tasks/ensure-terminated.yml
+        params:
+          AWS_ACCESS_KEY_ID:     {{aws_access_key__primary}}
+          AWS_SECRET_ACCESS_KEY: {{aws_secret_key__primary}}
+          AWS_DEFAULT_REGION:    {{aws_region__primary}}
+
       - put: terraform
         params:
           terraform:
@@ -37,6 +48,7 @@ jobs:
           action: destroy
         get_params:
           action: destroy
+
       - put: environment
         params:
           remove: environment
@@ -78,7 +90,7 @@ jobs:
         file: bosh-cpi-src/ci/tasks/build-candidate.yml
 
       - put: bosh-cpi-dev-artifacts
-        params: {file: candidate/.*\.tgz}
+        params: {file: candidate/*.tgz}
 
   # TODO: check for running instances and destroy
   - name: lifecycle
