@@ -3,6 +3,7 @@ platform: linux
 image: docker:///boshcpi/aws-cpi-release
 inputs:
   - name: bosh-cpi-src
+  - name: environment
 run:
   path: bosh-cpi-src/ci/tasks/ensure-terminated.sh
 params:
