@@ -3,10 +3,10 @@ platform: linux
 image: docker:///boshcpi/aws-cpi-release
 inputs:
   - name: bosh-cpi-src
+  - name: environment
 run:
   path: bosh-cpi-src/ci/tasks/run-lifecycle.sh
 params:
-  aws_access_key_id:     replace-me
-  aws_secret_access_key: replace-me
-  region_name:           replace-me
-  stack_name:            replace-me
+  AWS_ACCESS_KEY_ID:     ""
+  AWS_SECRET_ACCESS_KEY: ""
+  AWS_DEFAULT_REGION:    ""

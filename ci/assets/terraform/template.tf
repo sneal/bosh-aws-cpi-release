@@ -184,5 +184,9 @@ output "StaticIP2" {
 }
 
 output "ELB" {
-    value = "aws_elb.default.id"
+    value = "${aws_elb.default.id}"
+}
+
+output "ELBEndpoint" {
+    value = "${aws_elb.default.dns_name}"
 }

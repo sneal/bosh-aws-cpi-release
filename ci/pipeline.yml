@@ -26,29 +26,35 @@ groups:
 jobs:
   - name: add-new-env
     plan:
-      - get: bosh-cpi-src, resource: bosh-cpi-src-in
+      - get: bosh-cpi-src
+        resource: bosh-cpi-src-in
       - put: terraform
         params:
-          source: bosh-cpi-src/ci/assets/terraform
+          terraform:
+            source: bosh-cpi-src/ci/assets/terraform
           generate_random_name: true
-      - put: locks
+      - put: environment
         params:
           add: terraform
 
   - name: destroy-env
     plan:
-      - get: bosh-cpi-src, resource: bosh-cpi-src-in
-      - put: locks
+      - get: bosh-cpi-src
+        resource: bosh-cpi-src-in
+      - put: environment
         params:
           acquire: true
       - put: terraform
         params:
-          source: bosh-cpi-src/ci/assets/terraform
-          env_name_file: locks/name
+          terraform:
+            source: bosh-cpi-src/ci/assets/terraform
+          env_name_file: environment/name
           action: destroy
-      - put: locks
+        get_params:
+          action: destroy
+      - put: environment
         params:
-          remove: locks
+          remove: environment
 
   - name: recreate-infrastructure-primary
     serial_groups: [lifecycle]
@@ -96,13 +102,22 @@ jobs:
         - {trigger: true,  passed: [build-candidate], get: bosh-cpi-release, resource: bosh-cpi-dev-artifacts}
         - {trigger: false, passed: [build-candidate], get: bosh-cpi-src, resource: bosh-cpi-src-in}
 
+      - put: environment
+        params:
+          acquire: true
+
       - task: test
         file: bosh-cpi-src/ci/tasks/run-lifecycle.yml
         params:
-          aws_access_key_id:            {{aws_access_key__primary}}
-          aws_secret_access_key:        {{aws_secret_key__primary}}
-          region_name:                  {{aws_region__primary}}
-          stack_name:                   develop-lifecycle
+          AWS_ACCESS_KEY_ID:     {{aws_access_key__primary}}
+          AWS_SECRET_ACCESS_KEY: {{aws_secret_key__primary}}
+          AWS_DEFAULT_REGION:    {{aws_region__primary}}
+
+      ensure:
+        do:
+          - put: environment
+            params:
+              release: environment
 
   - name: promote-candidate
     plan:
@@ -114,8 +129,8 @@ jobs:
       - task: promote
         file: bosh-cpi-src/ci/tasks/promote-candidate.yml
         params:
-          aws_access_key_id: {{aws_access_key__primary}}
-          aws_secret_access_key: {{aws_secret_key__primary}}
+          AWS_ACCESS_KEY_ID:     {{aws_access_key__primary}}
+          AWS_SECRET_ACCESS_KEY: {{aws_secret_key__primary}}
 
       - put: bosh-cpi-src-out
         params: {repository: promoted/repo, rebase: true, tag_prefix: "v", tag: promoted/integer_version}
@@ -171,10 +186,11 @@ resources:
       access_key_id:     {{aws_access_key__primary}}
       secret_access_key: {{aws_secret_key__primary}}
 
-  - name: locks
+  - name: environment
     type: pool
     source:
       uri: git@github.com:cloudfoundry/bosh-cpi-environments.git
+      branch: master
       pool: aws
       private_key: {{github_deployment_key__bosh-cpi-environments}}
 
