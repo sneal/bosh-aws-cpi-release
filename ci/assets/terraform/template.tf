@@ -128,6 +128,12 @@ resource "aws_elb" "default" {
   }
 }
 
+resource "aws_vpc_endpoint" "private-s3" {
+    vpc_id = "${aws_vpc.default.id}"
+    service_name = "com.amazonaws.${var.region}.s3"
+    route_table_ids = ["${aws_route_table.default.id}"]
+}
+
 resource "aws_s3_bucket" "blobstore" {
   bucket = "cpi-pipeline-blobstore-${var.env_name}"
   force_destroy = true
