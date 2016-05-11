@@ -95,7 +95,6 @@ jobs:
 
   # TODO: check for running instances and destroy
   - name: lifecycle
-    serial_groups: [lifecycle]
     plan:
       - aggregate:
         - {trigger: true,  passed: [build-candidate], get: bosh-cpi-release, resource: bosh-cpi-dev-artifacts}
@@ -115,6 +114,71 @@ jobs:
 
         ensure:
           do:
+            - put: environment
+              params:
+                release: environment
+
+  - name: bats
+    serial: true
+    plan:
+      - aggregate:
+        - {get: cpi-release,   trigger: true,  resource: bosh-cpi-dev-artifacts, passed: [build-candidate]}
+        - {get: bosh-release,  trigger: false, resource: old-bosh-release}
+        - {get: bosh-cpi-src,  trigger: false, resource: bosh-cpi-src-in, passed: [build-candidate]}
+        - {get: stemcell,      trigger: false, resource: old-stemcell}
+        - {get: certification, trigger: false}
+        - {get: bosh-init,     trigger: false}
+        - {get: bats,          trigger: false}
+
+      - put: environment
+        params:
+          acquire: true
+
+      - task: prepare-director
+        file: bosh-cpi-src/ci/tasks/prepare-director.yml
+        params:
+            BOSH_DIRECTOR_USERNAME: {{BOSH_DIRECTOR_USERNAME}}
+            BOSH_DIRECTOR_PASSWORD: {{BOSH_DIRECTOR_PASSWORD}}
+            AWS_ACCESS_KEY:         {{aws_access_key__primary}}
+            AWS_SECRET_KEY:         {{aws_secret_key__primary}}
+            AWS_REGION_NAME:        {{aws_region__primary}}
+            PUBLIC_KEY_NAME:        {{cpi_pipeline_public_key_name}}
+            PRIVATE_KEY_DATA:       {{cpi_pipeline_private_key}}
+            USE_REDIS:              true
+
+      - do:
+          - task: deploy-director
+            file: certification/shared/tasks/deploy-director.yml
+            input_mapping: {pipelines: certification}
+            params:
+              BOSH_DIRECTOR_USERNAME: {{BOSH_DIRECTOR_USERNAME}}
+              BOSH_DIRECTOR_PASSWORD: {{BOSH_DIRECTOR_PASSWORD}}
+
+          - task: prepare-manual-bats
+            file: bosh-cpi-src/ci/tasks/prepare-manual-bats.yml
+            params:
+              AWS_ACCESS_KEY:         {{aws_access_key__primary}}
+              AWS_SECRET_KEY:         {{aws_secret_key__primary}}
+              AWS_REGION_NAME:        {{aws_region__primary}}
+              BAT_VCAP_PASSWORD:      {{BAT_VCAP_PASSWORD}}
+              PUBLIC_KEY_NAME:        {{cpi_pipeline_public_key_name}}
+              BOSH_DIRECTOR_USERNAME: {{BOSH_DIRECTOR_USERNAME}}
+              BOSH_DIRECTOR_PASSWORD: {{BOSH_DIRECTOR_PASSWORD}}
+              STEMCELL_NAME:          bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+
+          - task: run-bats
+            file: certification/shared/tasks/run-bats.yml
+            input_mapping: {pipelines: certification}
+
+        ensure:
+          do:
+            - task: teardown
+              file: certification/shared/tasks/teardown.yml
+              input_mapping: {pipelines: certification}
+              params:
+                BOSH_DIRECTOR_USERNAME: {{BOSH_DIRECTOR_USERNAME}}
+                BOSH_DIRECTOR_PASSWORD: {{BOSH_DIRECTOR_PASSWORD}}
+                DEPLOYMENT_NAME:        certification
             - put: environment
               params:
                 release: environment
@@ -207,3 +271,32 @@ resources:
           access_key: {{aws_access_key__primary}}
           secret_key: {{aws_secret_key__primary}}
           region:     {{aws_region__primary}}
+
+  - name: bosh-init
+    type: s3
+    source:
+      regexp: bosh-init-([0-9.]+)-linux-amd64
+      bucket: bosh-init-artifacts
+      region_name: us-east-1
+
+  - name: certification
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-incubator/bosh-cpi-certification
+      branch: master
+
+    # upgrade resources
+  - name: old-bosh-release
+    type: s3
+    source:
+      bucket: bosh-cpi-certification-fixtures
+      # TODO: Actually get this thing in the bucket
+      regexp: precompiled-bosh-(255.8)-on-ubuntu-3232.3.tgz
+      region_name: us-east-1
+
+  - name: old-stemcell
+    type: s3
+    source:
+      bucket: bosh-cpi-certification-fixtures
+      regexp: light-bosh-stemcell-(3232.3)-aws-xen-hvm-ubuntu-trusty-go_agent.tgz
+      region_name: us-east-1

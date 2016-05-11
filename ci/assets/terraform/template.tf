@@ -7,9 +7,9 @@ variable "region" {}
 variable "env_name" {}
 
 provider "aws" {
-    access_key = "${var.access_key}"
-    secret_key = "${var.secret_key}"
-    region = "${var.region}"
+  access_key = "${var.access_key}"
+  secret_key = "${var.secret_key}"
+  region = "${var.region}"
 }
 
 # Create a VPC to launch our instances into
@@ -29,55 +29,55 @@ resource "aws_internet_gateway" "default" {
 }
 
 resource "aws_route_table" "default" {
-    vpc_id = "${aws_vpc.default.id}"
-    route {
-        cidr_block = "0.0.0.0/0"
-        gateway_id = "${aws_internet_gateway.default.id}"
-    }
+  vpc_id = "${aws_vpc.default.id}"
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.default.id}"
+  }
 
-    tags {
-      Name = "${var.env_name}"
-    }
+  tags {
+    Name = "${var.env_name}"
+  }
 }
 
 resource "aws_route_table_association" "a" {
-    subnet_id = "${aws_subnet.default.id}"
-    route_table_id = "${aws_route_table.default.id}"
+  subnet_id = "${aws_subnet.default.id}"
+  route_table_id = "${aws_route_table.default.id}"
 }
 
 resource "aws_subnet" "default" {
-    vpc_id = "${aws_vpc.default.id}"
-    cidr_block = "${aws_vpc.default.cidr_block}"
+  vpc_id = "${aws_vpc.default.id}"
+  cidr_block = "${aws_vpc.default.cidr_block}"
 
-    tags {
-      Name = "${var.env_name}"
-    }
+  tags {
+    Name = "${var.env_name}"
+  }
 }
 
 resource "aws_network_acl" "allow_all" {
-    vpc_id = "${aws_vpc.default.id}"
-    subnet_ids = ["${aws_subnet.default.id}"]
-    egress {
-        protocol = "-1"
-        rule_no = 2
-        action = "allow"
-        cidr_block =  "0.0.0.0/0"
-        from_port = 0
-        to_port = 0
-    }
+  vpc_id = "${aws_vpc.default.id}"
+  subnet_ids = ["${aws_subnet.default.id}"]
+  egress {
+    protocol = "-1"
+    rule_no = 2
+    action = "allow"
+    cidr_block =  "0.0.0.0/0"
+    from_port = 0
+    to_port = 0
+  }
 
-    ingress {
-        protocol = "-1"
-        rule_no = 1
-        action = "allow"
-        cidr_block =  "0.0.0.0/0"
-        from_port = 0
-        to_port = 0
-    }
+  ingress {
+    protocol = "-1"
+    rule_no = 1
+    action = "allow"
+    cidr_block =  "0.0.0.0/0"
+    from_port = 0
+    to_port = 0
+  }
 
-    tags {
-        Name = "${var.env_name}"
-    }
+  tags {
+      Name = "${var.env_name}"
+  }
 }
 
 resource "aws_security_group" "allow_all" {
@@ -86,17 +86,17 @@ resource "aws_security_group" "allow_all" {
   description = "Allow all inbound and outgoing traffic"
 
   ingress {
-      from_port = 0
-      to_port = 0
-      protocol = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-      from_port = 0
-      to_port = 0
-      protocol = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags {
@@ -105,11 +105,11 @@ resource "aws_security_group" "allow_all" {
 }
 
 resource "aws_eip" "director" {
-  vpc      = true
+  vpc = true
 }
 
 resource "aws_eip" "deployment" {
-  vpc      = true
+  vpc = true
 }
 
 # Create a new load balancer
@@ -128,66 +128,75 @@ resource "aws_elb" "default" {
   }
 }
 
+resource "aws_s3_bucket" "blobstore" {
+  bucket = "cpi-pipeline-blobstore-${var.env_name}"
+  force_destroy = true
+}
+
 output "VPCID" {
-    value = "${aws_vpc.default.id}"
+  value = "${aws_vpc.default.id}"
 }
 
 output "SecurityGroupID" {
-    value = "${aws_security_group.allow_all.id}"
+  value = "${aws_security_group.allow_all.id}"
 }
 
 output "DirectorEIP" {
-    value = "${aws_eip.director.public_ip}"
+  value = "${aws_eip.director.public_ip}"
 }
 
 output "DeploymentEIP" {
-    value = "${aws_eip.deployment.public_ip}"
+  value = "${aws_eip.deployment.public_ip}"
 }
 
 output "DirectorStaticIP" {
-    value = "${cidrhost(aws_vpc.default.cidr_block, 6)}"
+  value = "${cidrhost(aws_vpc.default.cidr_block, 6)}"
 }
 
 output "AvailabilityZone" {
-    value = "${aws_subnet.default.availability_zone}"
+  value = "${aws_subnet.default.availability_zone}"
 }
 
 output "PublicSubnetID" {
-    value = "${aws_subnet.default.id}"
+  value = "${aws_subnet.default.id}"
 }
 
 output "PublicCIDR" {
-    value = "${aws_vpc.default.cidr_block}"
+  value = "${aws_vpc.default.cidr_block}"
 }
 
 output "PublicGateway" {
-    value = "${cidrhost(aws_vpc.default.cidr_block, 1)}"
+  value = "${cidrhost(aws_vpc.default.cidr_block, 1)}"
 }
 
 output "DNS" {
-    value = "${cidrhost(aws_vpc.default.cidr_block, 2)}"
+  value = "${cidrhost(aws_vpc.default.cidr_block, 2)}"
 }
 
 output "ReservedRange" {
-    value = "${cidrhost(aws_vpc.default.cidr_block, 2)}-${cidrhost(aws_vpc.default.cidr_block, 9)}"
+  value = "${cidrhost(aws_vpc.default.cidr_block, 2)}-${cidrhost(aws_vpc.default.cidr_block, 9)}"
 }
 
 output "StaticRange" {
-    value = "${cidrhost(aws_vpc.default.cidr_block, 10)}-${cidrhost(aws_vpc.default.cidr_block, 30)}"
+  value = "${cidrhost(aws_vpc.default.cidr_block, 10)}-${cidrhost(aws_vpc.default.cidr_block, 30)}"
 }
 
 output "StaticIP1" {
-    value = "${cidrhost(aws_vpc.default.cidr_block, 29)}"
+  value = "${cidrhost(aws_vpc.default.cidr_block, 29)}"
 }
 
 output "StaticIP2" {
-    value = "${cidrhost(aws_vpc.default.cidr_block, 30)}"
+  value = "${cidrhost(aws_vpc.default.cidr_block, 30)}"
 }
 
 output "ELB" {
-    value = "${aws_elb.default.id}"
+  value = "${aws_elb.default.id}"
 }
 
 output "ELBEndpoint" {
-    value = "${aws_elb.default.dns_name}"
+  value = "${aws_elb.default.dns_name}"
+}
+
+output "BlobstoreBucket" {
+  value = "${aws_s3_bucket.blobstore.id}"
 }
