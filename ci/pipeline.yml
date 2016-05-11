@@ -6,6 +6,7 @@ groups:
       - destroy-environment
       - build-candidate
       - lifecycle
+      - bats
       - promote-candidate
 
 jobs:
@@ -300,3 +301,9 @@ resources:
       bucket: bosh-cpi-certification-fixtures
       regexp: light-bosh-stemcell-(3232.3)-aws-xen-hvm-ubuntu-trusty-go_agent.tgz
       region_name: us-east-1
+
+  - name: bats
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-acceptance-tests.git
+      branch: master

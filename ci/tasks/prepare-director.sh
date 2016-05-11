@@ -8,7 +8,6 @@ set -e
 : ${AWS_ACCESS_KEY:?}
 : ${AWS_SECRET_KEY:?}
 : ${AWS_REGION_NAME:?}
-: ${AWS_STACK_NAME:?}
 : ${PUBLIC_KEY_NAME:?}
 : ${PRIVATE_KEY_DATA:?}
 : ${USE_REDIS:=false}
