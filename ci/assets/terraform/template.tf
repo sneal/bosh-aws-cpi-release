@@ -28,21 +28,11 @@ resource "aws_internet_gateway" "default" {
   }
 }
 
-resource "aws_route_table" "default" {
-  vpc_id = "${aws_vpc.default.id}"
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.default.id}"
-  }
-
-  tags {
-    Name = "${var.env_name}"
-  }
-}
-
-resource "aws_route_table_association" "a" {
-  subnet_id = "${aws_subnet.default.id}"
-  route_table_id = "${aws_route_table.default.id}"
+# Grant the VPC internet access on its main route table
+resource "aws_route" "internet_access" {
+  route_table_id         = "${aws_vpc.default.main_route_table_id}"
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = "${aws_internet_gateway.default.id}"
 }
 
 resource "aws_subnet" "default" {
@@ -52,32 +42,6 @@ resource "aws_subnet" "default" {
 
   tags {
     Name = "${var.env_name}"
-  }
-}
-
-resource "aws_network_acl" "allow_all" {
-  vpc_id = "${aws_vpc.default.id}"
-  subnet_ids = ["${aws_subnet.default.id}"]
-  egress {
-    protocol = "-1"
-    rule_no = 2
-    action = "allow"
-    cidr_block =  "0.0.0.0/0"
-    from_port = 0
-    to_port = 0
-  }
-
-  ingress {
-    protocol = "-1"
-    rule_no = 1
-    action = "allow"
-    cidr_block =  "0.0.0.0/0"
-    from_port = 0
-    to_port = 0
-  }
-
-  tags {
-      Name = "${var.env_name}"
   }
 }
 
@@ -127,12 +91,6 @@ resource "aws_elb" "default" {
   tags {
     Name = "${var.env_name}"
   }
-}
-
-resource "aws_vpc_endpoint" "private-s3" {
-    vpc_id = "${aws_vpc.default.id}"
-    service_name = "com.amazonaws.${var.region}.s3"
-    route_table_ids = ["${aws_route_table.default.id}"]
 }
 
 resource "aws_s3_bucket" "blobstore" {
