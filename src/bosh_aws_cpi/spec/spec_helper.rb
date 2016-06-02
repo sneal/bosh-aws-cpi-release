@@ -3,6 +3,7 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'tmpdir'
 require 'bosh/cpi'
 require 'cloud/aws'
+require 'bosh/cloud/aws'
 
 MOCK_AWS_ACCESS_KEY_ID = 'foo'
 MOCK_AWS_SECRET_ACCESS_KEY = 'bar'
