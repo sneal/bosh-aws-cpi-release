@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe 'spec_helper' do
-  before(:each) do
-
-  end
-
   it 'merges a flat hash' do
     base_hash = {
         a: 5,

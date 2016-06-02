@@ -1,5 +1,3 @@
-# Copyright (c) 2009-2012 VMware, Inc.
-
 module Bosh::AwsCloud
   ##
   # Represents AWS instance network config. EC2 instance has single NIC

@@ -1,6 +1,5 @@
 module Bosh::AwsCloud
   class TagManager
-
     MAX_TAG_KEY_LENGTH = 127
     MAX_TAG_VALUE_LENGTH = 255
 

@@ -1,7 +1,6 @@
 require "spec_helper"
 
 describe Bosh::AwsCloud::AvailabilityZoneSelector do
-
   let(:instances) { double(AWS::EC2::InstanceCollection) }
   let(:instance) { double(AWS::EC2::Instance, :availability_zone => 'this_zone') }
   let(:us_east_1a) { double(AWS::EC2::AvailabilityZone, name: 'us-east-1a') }

@@ -1,9 +1,6 @@
-# Copyright (c) 2009-2012 VMware, Inc.
-
 require "spec_helper"
 
 describe Bosh::AwsCloud::Cloud do
-
   it "gets volume ids" do
     fake_instance_id = "fakeinstance"
 

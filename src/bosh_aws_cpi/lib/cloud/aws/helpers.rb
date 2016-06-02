@@ -1,5 +1,4 @@
 module Bosh::AwsCloud
-
   module Helpers
     ##
     # Raises CloudError exception

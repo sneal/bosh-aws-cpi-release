@@ -1,9 +1,6 @@
-# Copyright (c) 2009-2012 VMware, Inc.
-
 require 'spec_helper'
 
 describe Bosh::AwsCloud::Cloud do
-
   let(:zones) { [double('us-east-1a', :name => 'us-east-1a')] }
   let(:volume) { double('volume', :id => 'v-foobar') }
   let(:instance) { double('instance', id: 'i-test', availability_zone: 'foobar-land') }

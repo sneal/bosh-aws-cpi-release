@@ -1,6 +1,5 @@
 module Bosh::AwsCloud
   class AKIPicker
-
     # @param [AWS::Core::ServiceInterface] client
     def initialize(client)
       @client = client

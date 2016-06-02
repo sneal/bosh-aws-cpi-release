@@ -1,10 +1,7 @@
-# Copyright (c) 2009-2012 VMware, Inc.
-
 require "spec_helper"
 require 'webmock/rspec'
 
 describe Bosh::AwsCloud::Cloud do
-
   describe "#current_vm_id" do
     let(:options) {
       mock_cloud_properties_merge({

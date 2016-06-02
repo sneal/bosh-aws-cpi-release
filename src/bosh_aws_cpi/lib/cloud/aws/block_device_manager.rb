@@ -1,4 +1,3 @@
-
 module Bosh::AwsCloud
   class BlockDeviceManager
     attr_writer :resource_pool

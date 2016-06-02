@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2009-2012 VMware, Inc.
+
 
 # Usage example:
 # irb(main):001:0> cpi.create_vm("test", "ami-809a48e9",

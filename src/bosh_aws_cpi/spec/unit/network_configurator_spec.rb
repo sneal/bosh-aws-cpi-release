@@ -1,9 +1,6 @@
-# Copyright (c) 2009-2012 VMware, Inc.
-
 require "spec_helper"
 
 describe Bosh::AwsCloud::NetworkConfigurator do
-
   let(:dynamic) { {"type" => "dynamic"} }
   let(:manual) { {"type" => "manual", "cloud_properties" => {"subnet" => "sn-xxxxxxxx"}} }
   let(:vip) { {"type" => "vip"} }
@@ -48,12 +45,12 @@ describe Bosh::AwsCloud::NetworkConfigurator do
       spec["network_a"] = vip
       spec["network_a"]["ip"] = "10.0.0.1"
       spec["network_b"] = manual
-      spec["network_b"]["ip"] = "10.0.0.2"      
+      spec["network_b"]["ip"] = "10.0.0.2"
 
       nc = Bosh::AwsCloud::NetworkConfigurator.new(spec)
       expect(nc.private_ip).to eq("10.0.0.2")
-    end     
-    
+    end
+
     it "should not extract private ip address for dynamic network" do
       spec = {}
       spec["network_a"] = dynamic
@@ -61,9 +58,9 @@ describe Bosh::AwsCloud::NetworkConfigurator do
 
       nc = Bosh::AwsCloud::NetworkConfigurator.new(spec)
       expect(nc.private_ip).to be_nil
-    end     
+    end
   end
-  
+
   describe "network types" do
 
     it "should raise an error if both dynamic and manual networks are defined" do

@@ -1,9 +1,6 @@
-# Copyright (c) 2009-2012 VMware, Inc.
-
 require "spec_helper"
 
 describe Bosh::AwsCloud::Cloud do
-
   before(:each) do
     @registry = mock_registry
   end
@@ -91,7 +88,7 @@ describe Bosh::AwsCloud::Cloud do
     expect(@registry).to receive(:read_settings).
       with("i-test").
       and_return(old_settings)
-    
+
     expect(@registry).to receive(:update_settings).with("i-test", new_settings)
 
     expect {

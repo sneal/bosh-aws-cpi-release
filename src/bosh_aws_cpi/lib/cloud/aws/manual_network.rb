@@ -1,8 +1,5 @@
 module Bosh::AwsCloud
-  ##
-  #
   class ManualNetwork < Network
-
     attr_reader :subnet
 
     # create manual network
