@@ -1,5 +1,15 @@
 require "spec_helper"
 
+# module Bosh::AwsCloud
+#   describe Cloud do
+#     describe '#create_vm' do
+#       api   = instance_double(Bosh::Cloud::AWS::API)
+#       cpi   = Bosh::Cloud::AWS::CPI.new({}, api)
+#       cloud = Cloud.new({}, cpi)
+#     end
+#   end
+# end
+
 describe Bosh::AwsCloud::Cloud, "create_vm" do
   let(:registry) { double("registry") }
   let(:ec2) { double("ec2", regions: [ double("region") ]) }

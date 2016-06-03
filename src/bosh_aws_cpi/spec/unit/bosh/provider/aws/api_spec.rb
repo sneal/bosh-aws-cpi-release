@@ -1,6 +1,6 @@
 require "spec_helper"
 
-module Bosh::Cloud::AWS
+module Bosh::Provider::AWS
   describe API do
     subject(:api) { API.new(config, logger, ec2, elb) }
 

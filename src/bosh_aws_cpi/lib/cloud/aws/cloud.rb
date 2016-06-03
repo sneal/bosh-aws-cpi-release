@@ -19,6 +19,13 @@ module Bosh::AwsCloud
     # @option options [Hash] agent agent options
     # @option options [Hash] registry agent options
     def initialize(options)
+      # options {
+      #   :key => 'value',
+      #   :aws => {
+      #     'region' => 'us-east-1'
+      #   }
+      # }
+
       @options = options.dup.freeze
       validate_options
       validate_credentials_source
@@ -125,6 +132,9 @@ module Bosh::AwsCloud
     #   agent settings
     # @return [String] EC2 instance id of the new virtual machine
     def create_vm(agent_id, stemcell_id, resource_pool, network_spec, disk_locality = nil, environment = nil)
+      # @cpi.create_vm(agent_id, stemcell_id)
+
+
       with_thread_name("create_vm(#{agent_id}, ...)") do
         # do this early to fail fast
         stemcell = StemcellFinder.find_by_id(@ec2_client, stemcell_id)

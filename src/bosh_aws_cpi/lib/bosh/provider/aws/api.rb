@@ -1,6 +1,8 @@
 module Bosh
-  module Cloud::AWS
+  module Provider::AWS
     class API
+      attr_reader :ec2, :elb
+
       def initialize(config, logger, ec2 = nil, elb = nil)
         @config = config
         @logger = logger
@@ -11,6 +13,9 @@ module Bosh
       def create_instance(params)
         response = @ec2.client.run_instances(params)
         response.instances_set.first.instance_id
+      end
+
+      def configure_network(instance)
       end
 
       private

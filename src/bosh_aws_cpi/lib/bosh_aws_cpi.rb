@@ -1,2 +1,2 @@
-require "bosh/cloud/aws"
+require "bosh/provider/aws"
 require "cloud/aws"
