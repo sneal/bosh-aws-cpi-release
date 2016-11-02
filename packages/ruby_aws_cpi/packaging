@@ -13,7 +13,7 @@ fi
 echo "Installing yaml"
 tar xzf ruby_aws_cpi/yaml-0.1.5.tar.gz
 pushd yaml-0.1.5 > /dev/null
-  CFLAGS='-fPIC' ./configure --prefix=${BOSH_INSTALL_TARGET} --disable-shared
+  CFLAGS='-DYAML_DECLARE_STATIC' ./configure --prefix=${BOSH_INSTALL_TARGET}
   make
   make install
 popd > /dev/null
@@ -21,7 +21,7 @@ popd > /dev/null
 echo "Installing ruby"
 tar xzf ruby_aws_cpi/ruby-2.2.4.tar.gz
 pushd ruby-2.2.4 > /dev/null
-  LDFLAGS="-Wl,-rpath -Wl,${BOSH_INSTALL_TARGET}" CFLAGS='-fPIC' ./configure --prefix=${BOSH_INSTALL_TARGET} --disable-install-doc --with-opt-dir=/usr/local/opt/openssl:${BOSH_INSTALL_TARGET}
+  ./configure --prefix=${BOSH_INSTALL_TARGET} --disable-install-doc
   make
   make install
 popd > /dev/null
